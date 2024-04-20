@@ -76,5 +76,31 @@ module.exports = {
         } catch (error) {
             throw error;
         }
+    },
+
+    getUserById: async (userId) => {
+        try {
+            const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [userId]);
+            return rows[0]; // Assuming userId is unique, return the first row
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    updateUser: async (userId, updatedUserData) => {
+        const { firstName, lastName, gender, email, number, preferences } = updatedUserData;
+        try {
+            await pool.query('UPDATE users SET firstName = ?, lastName = ?, gender = ?, email = ?, number = ?, preferences = ? WHERE id = ?', [firstName, lastName, gender, email, number, JSON.stringify(preferences), userId]);
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    assignTask: async (taskId, assignedTo) => {
+        try {
+            await pool.query('UPDATE tasks SET assignedTo = ? WHERE id = ?', [assignedTo, taskId]);
+        } catch (error) {
+            throw error;
+        }
     }
 }; // <-- added closing parenthesis

@@ -118,4 +118,45 @@ module.exports = {
             res.status(500).json({ message: 'Internal server error' });
         }
     },
+
+    viewProfile: async (req, res) => {
+        try {
+            const userId = req.user.id; // Assuming you have user id in the request object after authentication
+            const userProfile = await userService.getUserById(userId);
+            if (!userProfile) {
+                res.status(404).json({ message: 'User not found' });
+                return;
+            }
+            res.status(200).json({ userProfile });
+        } catch (error) {
+            console.error('Error viewing profile:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    updateProfile: async (req, res) => {
+        try {
+            const userId = req.user.id; // Assuming you have user id in the request object after authentication
+            const updatedUserData = req.body;
+            await userService.updateUser(userId, updatedUserData);
+            res.status(200).json({ message: 'Profile updated successfully' });
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    assignTask: async (req, res) => {
+        try {
+            const { taskId, assignedTo } = req.body;
+            if (!taskId || !assignedTo) {
+                return res.status(400).json({ message: 'Task ID and assignedTo are required' });
+            }
+            await taskService.assignTask(taskId, assignedTo);
+            res.status(200).json({ message: 'Task assigned successfully' });
+        } catch (error) {
+            console.error('Error assigning task:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    }
 };

@@ -5,7 +5,7 @@ const pool = createPool({
   port: 3306,
   user: "root",
   password: "root",
-  database: "TaskManger",
+  database: "TaskMaster",
   connectionLimit: 10
 });
 
