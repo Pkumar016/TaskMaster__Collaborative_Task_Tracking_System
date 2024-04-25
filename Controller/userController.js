@@ -3,7 +3,7 @@ const {
     getUserByUserEmail
 } = require("./userService");
 
-const taskService = require("./taskService"); // Import taskService module
+const taskService = require("./taskService"); 
 const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
@@ -12,7 +12,7 @@ module.exports = {
         const body = req.body;
         const salt = genSaltSync(10);
         body.password = hashSync(body.password, salt);
-        body.role = 'attendee'; // Default role
+        body.role = 'attendee'; 
 
         create(body, (err, results) => {
             if (err) {
@@ -121,7 +121,7 @@ module.exports = {
 
     viewProfile: async (req, res) => {
         try {
-            const userId = req.user.id; // Assuming you have user id in the request object after authentication
+            const userId = req.user.id; 
             const userProfile = await userService.getUserById(userId);
             if (!userProfile) {
                 res.status(404).json({ message: 'User not found' });
@@ -136,7 +136,7 @@ module.exports = {
 
     updateProfile: async (req, res) => {
         try {
-            const userId = req.user.id; // Assuming you have user id in the request object after authentication
+            const userId = req.user.id; 
             const updatedUserData = req.body;
             await userService.updateUser(userId, updatedUserData);
             res.status(200).json({ message: 'Profile updated successfully' });
@@ -158,5 +158,99 @@ module.exports = {
             console.error('Error assigning task:', error);
             res.status(500).json({ message: 'Internal server error' });
         }
+    },
+
+    addComment: async (req, res) => {
+        try {
+            const { taskId, userId, comment } = req.body;
+            if (!taskId || !userId || !comment) {
+                return res.status(400).json({ message: 'Task ID, user ID, and comment are required' });
+            }
+            const newComment = await commentService.addComment(taskId, userId, comment);
+            res.status(201).json({ message: 'Comment added successfully', comment: newComment });
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    addAttachment: async (req, res) => {
+        try {
+            const { taskId, attachmentUrl } = req.body;
+            if (!taskId || !attachmentUrl) {
+                return res.status(400).json({ message: 'Task ID and attachment URL are required' });
+            }
+            const newAttachment = await attachmentService.addAttachment(taskId, attachmentUrl);
+            res.status(201).json({ message: 'Attachment added successfully', attachment: newAttachment });
+        } catch (error) {
+            console.error('Error adding attachment:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    createTeam: async (req, res) => {
+        try {
+            const { name, description } = req.body;
+            if (!name || !description) {
+                return res.status(400).json({ message: 'Name and description are required to create a team' });
+            }
+            const newTeam = await teamService.createTeam(name, description);
+            res.status(201).json({ message: 'Team created successfully', team: newTeam });
+        } catch (error) {
+            console.error('Error creating team:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    getTeamById: async (req, res) => {
+        try {
+            const teamId = req.params.teamId;
+            const team = await teamService.getTeamById(teamId);
+            if (!team) {
+                res.status(404).json({ message: 'Team not found' });
+                return;
+            }
+            res.status(200).json({ team });
+        } catch (error) {
+            console.error('Error getting team by ID:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    updateTeam: async (req, res) => {
+        try {
+            const teamId = req.params.teamId;
+            const updatedTeamData = req.body;
+            await teamService.updateTeam(teamId, updatedTeamData);
+            res.status(200).json({ message: 'Team updated successfully' });
+        } catch (error) {
+            console.error('Error updating team:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    inviteToTeam: async (req, res) => {
+        try {
+            const { teamId, userId } = req.body;
+            if (!teamId || !userId) {
+                return res.status(400).json({ message: 'Team ID and user ID are required to invite to team' });
+            }
+            await teamService.inviteToTeam(teamId, userId);
+            res.status(200).json({ message: 'Invitation sent successfully' });
+        } catch (error) {
+            console.error('Error inviting to team:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    },
+
+    logout: (req, res) => {
+        try {
+            res.clearCookie('token');
+            res.status(200).json({ message: 'Logout successful' });
+        } catch (error) {
+            console.error('Error logging out:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
     }
+
 };

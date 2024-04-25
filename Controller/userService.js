@@ -12,8 +12,8 @@ module.exports = {
                 data.email,
                 data.password,
                 data.number,
-                JSON.stringify(data.preferences), // Convert preferences array to JSON string
-                defaultRole // Assign default role to the 'role' column
+                JSON.stringify(data.preferences), 
+                defaultRole 
             ],
             (error, results, fields) => {
                 if (error) {
@@ -42,7 +42,7 @@ module.exports = {
             const [result] = await pool.query('INSERT INTO tasks (title, description, dueDate, assignedTo) VALUES (?, ?, ?, ?)', [title, description, dueDate, assignedTo]);
             return { id: result.insertId, title, description, dueDate, assignedTo };
         } catch (error) {
-            throw error; // Throw the error for better error handling
+            throw error; 
         }
     },
     getAllTasks: async () => {
@@ -50,13 +50,13 @@ module.exports = {
             const [rows] = await pool.query('SELECT * FROM tasks');
             return rows;
         } catch (error) {
-            throw error; // Throw the error for better error handling
+            throw error; 
         }
     },
     getTaskById: async (taskId) => {
         try {
             const [rows] = await pool.query('SELECT * FROM tasks WHERE id = ?', [taskId]);
-            return rows[0]; // Assuming taskId is unique, return the first row
+            return rows[0]; 
         } catch (error) {
             throw error;
         }
@@ -81,7 +81,7 @@ module.exports = {
     getUserById: async (userId) => {
         try {
             const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [userId]);
-            return rows[0]; // Assuming userId is unique, return the first row
+            return rows[0]; 
         } catch (error) {
             throw error;
         }
@@ -102,5 +102,59 @@ module.exports = {
         } catch (error) {
             throw error;
         }
+    },
+
+    addComment: async (taskId, userId, comment) => {
+        try {
+            const [result] = await pool.query('INSERT INTO comments (taskId, userId, comment) VALUES (?, ?, ?)', [taskId, userId, comment]);
+            return { id: result.insertId, taskId, userId, comment };
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    addAttachment: async (taskId, attachmentUrl) => {
+        try {
+            const [result] = await pool.query('INSERT INTO attachments (taskId, attachmentUrl) VALUES (?, ?)', [taskId, attachmentUrl]);
+            return { id: result.insertId, taskId, attachmentUrl };
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    createTeam: async (name, description) => {
+        try {
+            const [result] = await pool.query('INSERT INTO teams (name, description) VALUES (?, ?)', [name, description]);
+            return { id: result.insertId, name, description };
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    getTeamById: async (teamId) => {
+        try {
+            const [rows] = await pool.query('SELECT * FROM teams WHERE id = ?', [teamId]);
+            return rows[0]; 
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    updateTeam: async (teamId, updatedTeamData) => {
+        const { name, description } = updatedTeamData;
+        try {
+            await pool.query('UPDATE teams SET name = ?, description = ? WHERE id = ?', [name, description, teamId]);
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    inviteToTeam: async (teamId, userId) => {
+        try {
+            await pool.query('UPDATE users SET teamId = ? WHERE id = ?', [teamId, userId]);
+        } catch (error) {
+            throw error;
+        }
     }
-}; // <-- added closing parenthesis
+
+}; 
