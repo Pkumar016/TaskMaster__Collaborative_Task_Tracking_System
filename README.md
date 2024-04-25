@@ -19,6 +19,5 @@ Real-time updates and notifications.
 
 Technologies Used
 1. Backend: Node.js, Express.js
-2. Database: MongoDB
+2. Database: MySQL
 3. Authentication: JSON Web Tokens (JWT)
-4. Real-time Updates: Socket.io
