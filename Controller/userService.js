@@ -1,25 +1,55 @@
 const pool = require("../Database/database");
 
+const defaultRole = 'attendee';
+
 module.exports = {
     create: (data, callBack) => {
+        console.log('Inserting new user:', data);
         pool.query(
-            `INSERT INTO users(firstName, lastName, gender, email, password, number) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO users(firstName, lastName, gender, email, password, number, preferences, role) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                data.first_name,
-                data.last_name,
+                data.firstName,
+                data.lastName,
                 data.gender,
                 data.email,
                 data.password,
                 data.number,
-                JSON.stringify(data.preferences), 
-                defaultRole 
+                JSON.stringify(data.preferences),
+                defaultRole // Use the defaultRole here
             ],
             (error, results, fields) => {
                 if (error) {
                     callBack(error);
                 } else {
                     callBack(null, results);
+                }
+            }
+        );
+    },
+    login: (email, password, callBack) => {
+        pool.query(
+            'SELECT * FROM users WHERE email = ?',
+            [email],
+            async (error, results, fields) => {
+                if (error) {
+                    callBack(error);
+                } else {
+                    if (results.length > 0) {
+                        const user = results[0];
+                        const passwordMatch = await compareSync(password, user.password);
+                        if (passwordMatch) {
+                            user.password = undefined; // Remove password from user object
+                            const token = sign({ userId: user.id }, "your_secret_key", {
+                                expiresIn: "1h"
+                            });
+                            callBack(null, { user, token });
+                        } else {
+                            callBack({ message: "Invalid email or password" });
+                        }
+                    } else {
+                        callBack({ message: "User not found" });
+                    }
                 }
             }
         );
@@ -157,4 +187,4 @@ module.exports = {
         }
     }
 
-}; 
+};

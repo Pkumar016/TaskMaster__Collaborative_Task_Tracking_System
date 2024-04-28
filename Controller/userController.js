@@ -1,18 +1,36 @@
 const {
     create,
-    getUserByUserEmail
+    getUserByUserEmail,
+    login,
+    createTask,
+    getAllTasks,
+    getTaskById,
+    updateTask,
+    deleteTask,
+    getUserById,
+    updateUser,
+    assignTask,
+    addComment,
+    addAttachment,
+    createTeam,
+    getTeamById,
+    updateTeam,
+    inviteToTeam
+
 } = require("./userService");
 
-const taskService = require("./taskService"); 
+const taskService = require("./taskService.js"); 
 const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
+
 module.exports = {
     createUser: (req, res) => {
+        console.log('Received request body:', req.body);
         const body = req.body;
         const salt = genSaltSync(10);
         body.password = hashSync(body.password, salt);
-        body.role = 'attendee'; 
+        body.role = defaultRole; // Set the default role here
 
         create(body, (err, results) => {
             if (err) {
